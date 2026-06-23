@@ -1,29 +1,31 @@
 import { google } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { streamText } from 'ai';
+
+// 🔑 CONFIGURAÇÕES SÊNIOR DE ROTA DO NEXT.[...](asc_slot://start-slot-7)JS 🚀
+export const dynamic = 'force-dynamic'; // Força a rota a ser sempre dinâmica (evita cache)[...](asc_slot://start-slot-8)
+export const runtime = 'nodejs';       // Garante o ambiente de execução estável para streaming
+
 
 export async function POST(req) {
   try {
-    // 1. Recebe os dados enviados pelo seu formulário frontend
-    const { tema } = await req.json();
+    const { prompt } = await req.json();
 
-    if (!tema) {
+    if (!prompt) {
       return Response.json({ erro: "Por favor, envie um tema!" }, { status: 400 });
     }
 
-    // 2. Cria um comando personalizado (Prompt) para guiar o comportamento da IA
-    const promptPersonalizado = `Você é um assistente criativo. Forneça 3 ideias de projetos ou conceitos interessantes sobre o seguinte tema: "${tema}". Mantenha as ideias diretas, curtas e inspiradoras.`;
+    const promptPersonalizado = `Você é um assistente criativo. Forneça 3 ideias de projetos ou conceitos interessantes sobre o seguinte tema: "${prompt}". Mantenha as ideias diretas, curtas e inspiradoras.`;
 
-    // 3. Chama o modelo da Google de forma rápida usando o SDK da Vercel
-    const { text } = await generateText({
-      model: google('gemini-2.5-flash'), // Modelo rápido e eficiente para tarefas de texto
+    const result = streamText({
+      model: google('gemini-2.5-flash'),
       prompt: promptPersonalizado,
     });
 
-    // 4. Retorna as ideias em formato JSON para o seu site
-    return Response.json({ resultado: text });
+    // 🚀 Retornamos estritamente texto puro de forma ultra compatível!
+    return result.toTextStreamResponse();
     
   } catch (error) {
-    console.error("Erro no processamento da API:", error);
-    return Response.json({ erro: "Ocorreu um erro interno ao processar sua requisição." }, { status: 500 });
+    console.error("Erro no streaming do backend:", error);
+    return Response.json({ erro: error.message }, { status: 500 });
   }
 }
